@@ -7,6 +7,7 @@ import static com.baeldung.common.GlobalConstants.tutorialsRepoLocalPath;
 import static com.baeldung.common.GlobalConstants.tutorialsRepos;
 import static com.baeldung.common.GlobalConstants.*;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.jgit.util.RawCharSequence.EMPTY;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
@@ -869,13 +870,14 @@ public class Utils {
         return  Character.isDigit(Character.valueOf(title.charAt(0))) || "Q".equals(String.valueOf(title.charAt(0))) || ">".equals(String.valueOf(title.charAt(0)))? 1 : 0;
      }
 
-
     public static boolean isEmpasized(String token, List<String> emphasizedAndItalicTokens) {
-        
-        if (emphasizedAndItalicTokens.contains(removeCommaAtTheEnd(token))) {
+        final String tokenWithoutPossession = token.endsWith(POSSESSION_CHARACTER) ? token.replace(POSSESSION_CHARACTER, EMPTY) : token;
+
+        if (emphasizedAndItalicTokens.contains(removeCommaAtTheEnd(token)) || emphasizedAndItalicTokens.contains(tokenWithoutPossession)) {
             return true;
         }
-        return emphasizedAndItalicTokens.stream().filter(empasizedToken -> empasizedToken.contains(token)).findFirst().isPresent();
+        return emphasizedAndItalicTokens.stream()
+            .anyMatch(emphasizedToken -> emphasizedToken.contains(token));
     }
 
     public static String removeCommaAtTheEnd(String token) {
@@ -957,4 +959,6 @@ public class Utils {
     public static String removeRepoLocalPath(String directoryName) {
         return directoryName.replace(tutorialsRepoLocalPath, "").replace("/" + POM_FILE_NAME_LOWERCASE, "");
     }
+
+    public static final String POSSESSION_CHARACTER = "'s";
 }
